@@ -5,7 +5,10 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.WebViewClient
+import com.google.android.material.snackbar.Snackbar
 import com.wagdybuild.newsapp.databinding.FragmentArticleBinding
+import com.wagdybuild.newsapp.models.Article
 import com.wagdybuild.newsapp.ui.MainActivity
 import com.wagdybuild.newsapp.viewModel.NewsViewModel
 
@@ -16,12 +19,30 @@ class ArticleFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View{
         binding = FragmentArticleBinding.inflate(inflater,container,false)
+
+        /** view model */
+        newsViewModel = (activity as MainActivity).newsViewModel
+
+        /** getting bundle data  */
+        val article: Article = arguments?.getSerializable("article")!! as Article
+        inflateData(article)
+
+
+        binding.fabAddToFavorites.setOnClickListener {
+            newsViewModel.updateOrInsertArticle(article)
+            Snackbar.make(container!!,"Article saved to favorites",Snackbar.LENGTH_SHORT).show()
+        }
+
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        newsViewModel = (activity as MainActivity).newsViewModel
+    private fun inflateData(article: Article) {
+        if(article.url.isNotEmpty()){
+            binding.webView.webViewClient = WebViewClient()
+            binding.webView.loadUrl(article.url)
+        }
+
+
     }
 
 }
